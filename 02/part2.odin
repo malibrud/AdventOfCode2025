@@ -1,56 +1,18 @@
-# Advent of Code 2025
+package main
 
-## [Day 01](https://adventofcode.com/2025/day/1) [Solutions](01/)
+import "core:os"
+import "core:fmt"
+import "core:slice"
+import "core:strings"
+import "core:strconv"
 
-Implemented the solution in [Odin](https://odin-lang.org/).  Given that
-the provlem invited solutions with modular arithmetic, part 2 took advantage
-of the modular floor operator `%%`.  Below is a snippet as to how it
-was used in the solution:
+main :: proc() {
+    lines := read_file_line_by_line( os.args[ 1 ] )
+    line :string= lines[ 0 ]
+    ranges := strings.split( line, "," )
 
-```odin
-    for line in lines {
-	rotation, ok := strconv.parse_int( line[ 1: ] )
-	turns := rotation / 100
-	count += turns
-	rotation %= 100
+    sum :i64= 0
 
-	if line[ 0 ] == 'L' { 
-	    rotation = -rotation
-	}
-	newpos := pos + rotation
-
-	if pos != 0 && newpos < 0 {
-	    count += 1
-	} else
-	if pos != 0 && newpos > 100 {
-	    count += 1
-	}
-
-	pos = newpos %% 100
-
-	if  pos == 0 {
-	    count += 1
-	}
-    } 
-```
-
-Since the `%%` always returns non-negative values for a positive divisor,
-I didn't have to do the calculation with the operator in C the based laguages,
-which would be:
-
-```c
-	pos = ( newpos + 100 ) % 100;
-```
-
-## [Day 02](https://adventofcode.com/2025/day/2) [Solutions](01/)
-
-Problem required chopping up a decimal number into even groups of digits.
-For part 1 this was always two groups, a high order group and a low order group.
-Part 2 extended this idea into any evenly divided number of digits.  This forced
-the solution to reduce the number into different bases which are factors of 10, 
-i.e. 10, 100, 1000, 10000, etc.  The solution for part 2 is below:
-
-```odin
     // Iterate through each range.
     for range in ranges {
         ends := strings.split( range, "-" )
@@ -94,5 +56,40 @@ i.e. 10, 100, 1000, 10000, etc.  The solution for part 2 is below:
             }
         }
     }
+    fmt.println( sum )
+}
 
-```
+power_10 :: proc( power: int ) -> i64 {
+    switch power {
+        case  1: return                10
+        case  2: return               100
+        case  3: return             1_000
+        case  4: return            10_000
+        case  5: return           100_000
+        case  6: return         1_000_000
+        case  7: return        10_000_000
+        case  8: return       100_000_000
+        case  9: return     1_000_000_000
+        case 10: return    10_000_000_000
+        case 11: return   100_000_000_000
+        case 12: return 1_000_000_000_000
+    }
+    return 0
+}
+
+digit_count :: proc( num : i64 ) -> int {
+    digits := 1
+    for val := num ; val > 9 ; val /= 10 do digits += 1 
+    return digits
+}
+
+read_file_line_by_line :: proc(filepath: string ) -> [dynamic]string {
+    data, ok := os.read_entire_file(filepath, context.allocator)
+
+    it := string(data)
+    lines : [dynamic]string
+    for line in strings.split_lines_iterator(&it) {
+        append( &lines, line )
+    }
+    return lines
+}
