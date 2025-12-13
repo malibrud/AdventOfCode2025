@@ -150,3 +150,43 @@ over the string, one for each digit.  The essentials are below.
     }
     fmt.println( sum )
 ```
+
+## [Day 04](https://adventofcode.com/2025/day/4) [Solutions](04/)
+
+This was a traditional _game of life_ style problem.  The second part required that
+I change my file read function to return a 2-D array of runes instead of an array of 
+strings.  This was necessary because I needed to keep track of which rolls were 
+removed.  The new file read funcion looks like the following:
+
+```odin
+read_file_line_by_line :: proc(filepath: string ) -> [dynamic]string {
+    data, ok := os.read_entire_file(filepath, context.allocator)
+
+    it := string(data)
+    lines : [dynamic]string
+    for line in strings.split_lines_iterator(&it) {
+        append( &lines, line )
+    }
+    return lines
+}
+```
+
+Furthermore, I started writing index based for loops in the odin way.  i.e. 
+
+```odin
+for r in 0 ..< R {
+    // body
+}
+
+for dr in -1 ..= +1 {
+    // body
+}
+}
+
+```
+
+Finally, I used the `do` for single line conditions after an if...
+
+```odin
+if grid[ r ][ c ] != '@' do continue
+```
