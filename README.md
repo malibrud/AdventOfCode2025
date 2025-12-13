@@ -42,13 +42,18 @@ which would be:
 	pos = ( newpos + 100 ) % 100;
 ```
 
-## [Day 02](https://adventofcode.com/2025/day/2) [Solutions](01/)
+## [Day 02](https://adventofcode.com/2025/day/2) [Solutions](02/)
 
 Problem required chopping up a decimal number into even groups of digits.
 For part 1 this was always two groups, a high order group and a low order group.
 Part 2 extended this idea into any evenly divided number of digits.  This forced
 the solution to reduce the number into different bases which are factors of 10, 
-i.e. 10, 100, 1000, 10000, etc.  The solution for part 2 is below:
+i.e. 10, 100, 1000, 10000, etc.  
+
+In this solution I found use for the `&&=` operator in Odin which is useful for accumulating
+logical values and is not available in C/C++.
+
+The solution for part 2 is below:
 
 ```odin
     // Iterate through each range.
@@ -95,4 +100,53 @@ i.e. 10, 100, 1000, 10000, etc.  The solution for part 2 is below:
         }
     }
 
+```
+
+## [Day 03](https://adventofcode.com/2025/day/3) [Solutions](03/)
+
+Problem was to find the maximum number (2 digit or 12 digit) from 
+the ordered permutations of the digits of a string (i.e. bank).
+Brute force worked well enough for part 1, but part 2 required 
+another approach to avoid 12 nested loops.
+
+The chosen approach was to search from left to right starting
+with the most significant digit and to find the index of the
+left most maximum value what was right of the next higher order
+digit.... leaving enough room for the higher order and lower order
+digits.  The code that I used to solve this only required 12 scans
+over the string, one for each digit.  The essentials are below.
+
+```odin
+    // Iterate through each "bank".
+    for bank in banks {
+        n_cells := len( bank )
+
+        NDIG :: 12
+        max_idxs : [NDIG]int
+        pos := 0
+
+        // Iterate through each place starting with the most significant digit 
+        // and scan from left to right for the max value.
+        for d := 0 ; d < NDIG ; d += 1 {
+            max_idxs[ d ] = pos 
+            for i := pos ; i < n_cells - ( NDIG - d - 1 ) ; i += 1 {
+                if bank[ i ] > bank[ max_idxs[ d ] ] {
+                    max_idxs[ d ] = i
+                }
+                if bank[ max_idxs[ d ] ] == '9' {
+                    break
+                }
+            }
+            pos = max_idxs[ d ] + 1
+        }
+
+        max_val :i64= 0
+        for d := 0 ; d < NDIG ; d += 1 {
+            digit := cast(i64) ( bank[ max_idxs[ d ] ] - '0')
+            max_val = 10*max_val + digit
+        }
+        
+        sum += max_val
+    }
+    fmt.println( sum )
 ```
