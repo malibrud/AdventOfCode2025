@@ -1,4 +1,4 @@
-# Advent of Code 2025
+ Advent of Code 2025
 
 ## [Day 01](https://adventofcode.com/2025/day/1) [Solutions](01/)
 
@@ -190,3 +190,59 @@ Finally, I used the `do` for single line conditions after an if...
 ```odin
 if grid[ r ][ c ] != '@' do continue
 ```
+
+## [Day 05](https://adventofcode.com/2025/day/5) [Solutions](05/)
+
+This challenge was to work with ranges of numbers.  Part 1 was pretty
+straight forward, part 2 required reducing the ranges to mutually
+exclusive ranges.  The heart of the algorithm in part two is as follows:
+
+```odin
+    for i in 0 ..< R {
+        for j in i+1 ..< R {
+            ra := &ranges[ i ]
+            rb := &ranges[ j ]
+
+            if ra.ub < rb.lb do continue // Ranges don't overlap
+            if ra.lb == -1 do continue // Range has been eliminated
+
+            if ra.ub < rb.ub { // Back of a overlaps with front of b
+                rb.lb = ra.ub + 1
+            }
+            else { // Range b is entirely inside of a
+                rb.lb = -1
+                rb.ub = -1
+            }
+        }
+    }
+
+    count :i64= 0
+    for &r in ranges {
+        if r.lb == -1 do continue
+        count += r.ub - r.lb + 1
+    }
+```
+
+This was the first chance I had to work with Odin's approach to collections
+in that the result required that I sort the ranges.  It follows C's
+approach in that a collection and a comparison function is passed to 
+a sort algorithm.  i.e. 
+
+```odin
+Range :: struct {
+    lb: i64,
+    ub: i64,
+}
+
+range_compare_lb :: proc( lhs, rhs : Range ) -> bool {
+    return lhs.lb < rhs.lb
+}
+
+ranges : [dynamic]Range
+
+slice.sort_by( ranges[:], range_compare_lb )
+```
+
+Second this is that I began working with items by reference.  In my
+loops I obtained the range by reference rather than by copy so that I
+could edit them to assure the mutual exclusivity of the ranges.
